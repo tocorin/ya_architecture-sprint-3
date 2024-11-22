@@ -1,0 +1,69 @@
+@startuml
+title Умный дом Component Diagram
+
+!include <C4/C4_Component>
+
+top to bottom direction
+
+Person(user, "Пользователь", "Пользователь системы Умный дом")
+System_Boundary(system, "Система Теплый дом") {
+    Container(apiGateway, "АPI Gateway", "Spring Boot Cloud", "Маршрутизация запросов, балансировка нагрузки, аутентификация, авторизация")
+
+    Container(telemetryService, "Телеметрия", "Spring Boot", "Управление телеметрией") {
+        Component(telemetryController, "Контроллер", "Обработка запросов пользователя к телеметрии")
+        Component(telemetryLogic, "Сервис", "Бизнес логика")
+        Component(telemetryRepo, "Репозиторий", "Запросы к БД")
+        Component(telemetryConsumer, "Обработчик входящей телеметрии", "Kafka Consumer")
+
+        Rel(telemetryController, telemetryLogic, "")
+        Rel(telemetryLogic, telemetryRepo, "")
+        Rel(telemetryConsumer, telemetryLogic, "")
+    }
+
+    Container(deviceService, "Управление устройствами", "Spring Boot", "Управление отоплением, автоматическое поддержание температуры") {
+        Component(deviceController, "Контроллер", "Обработка запросов пользователя к устройствам")
+        Component(deviceLogic, "Сервис", "Бизнес логика")
+        Component(deviceRepo, "Репозиторий", "Запросы к БД")
+        Component(deviceProducer, "Менеджер команд", "Kafka Consumer")
+
+        Rel(deviceController, deviceLogic, "")
+        Rel(deviceLogic, deviceRepo, "")
+        Rel(deviceLogic, deviceProducer, "")
+    }
+
+    Container(userService, "Управление пользователями", "Spring Boot", "Управление пользователями") {
+        Component(userController, "Контроллер", "Обработка запросов на управление пользователями")
+        Component(userLogic, "Сервис", "Бизнес логика")
+        Component(userRepo, "Репозиторий", "Запросы к БД")
+
+        Rel(userController, userLogic, "")
+        Rel(userLogic, userRepo, "")
+    }
+
+    ContainerDb(telemetryDb, "База данных", "ClickHouse")
+    ContainerDb(deviceDb, "База данных", "PostgreSQL")
+    ContainerDb(userDb, "База данных", "PostgreSQL")
+    ContainerQueue(kafka, "Шина данных", "Kafka")
+
+    Rel(apiGateway, telemetryController, "Получить телеметрию: последнюю, за период", "REST")
+    Rel(apiGateway, deviceController, "CRUD, вкл/выкл, выполнить команду", "REST")
+    Rel(apiGateway, userController, "СRUD", "REST")
+
+    Rel(deviceProducer, kafka, "Отправляет команды")
+    Rel_L(kafka, telemetryConsumer, "Отправляет телеметрию")
+
+    Rel(deviceRepo, deviceDb, "Чтение / запись")
+    Rel(telemetryRepo, telemetryDb, "Чтение / запись")
+    Rel(userRepo, userDb, "Чтение / запись")
+
+}
+
+
+System_Ext(device, "Устройства", "API устройств")
+
+Rel(kafka, device, "Отправляет команды")
+Rel(device, kafka, "Отправляет телеметрию")
+
+Rel(user, apiGateway, "Пользуется системой", "REST")
+
+@enduml
