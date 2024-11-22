@@ -1,0 +1,70 @@
+@startuml
+left to right direction
+entity House {
+  * id
+  --
+  * user_id
+  --
+  * address
+}
+
+entity User {
+  * id
+  --
+  * name
+  * email
+  * login
+  * password
+}
+
+entity Module {
+  * id
+  --
+  * house_id
+  * device_type_id
+  --
+  * serial_number
+  * title
+}
+
+entity DeviceType {
+  * id
+  --
+  * code
+  * description
+}
+
+entity Device {
+  * id
+  --
+  * module_id
+  --
+  * serial_number
+  * status
+}
+
+entity Telemetry {
+  * device_id
+  --
+  * timestamp
+  * data
+}
+
+note bottom of User {
+    Естественно, хранить пароли просто так в бд
+    не самое лучшее решение
+}
+
+note bottom of Telemetry
+  Первичный ключ специально убран, в нем нет необходимости
+  Предположим, что данных от устройств приходит много:
+  1. Мы выносим эту таблицу в clickhouse (столбцовая бд)
+  2. Для ускорения выборки, можно подумать о партициях по `datetime` и `device_id`
+end note
+
+Telemetry "0..1" -- "1" Device
+House "0..1" -- "1" User
+Module "0..1" -- "1" House
+Module "0..1" -- "1" DeviceType
+Device "0..1" -- "1" Module
+@enduml

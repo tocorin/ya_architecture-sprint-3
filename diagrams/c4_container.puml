@@ -1,0 +1,52 @@
+@startuml
+!include https://raw.githubusercontent.com/plantuml-stdlib/C4-PlantUML/master/C4_Container.puml
+
+title Система Теплый Дом. Containers Diagram
+
+!define HTTP_PROTOCOL REST/HTTP
+!define DB_PROTOCOL SQL/TCP
+!define SEND_REQUEST_TO_SERVICE Направляет запрос в сервис
+!define MAIN_TECH  Java, SpringBoot
+!define RDB_TECH PostgreSQL
+!define TELEMETRY_TECH Clickhouse
+
+Person(user, "User", "Пользователь системы 'Теплый Дом'")
+Container(mobileApp, "Mobile App", "react-native", "Мобильное приложение")
+Container(apiGateway, "API Gateway",Spring Cloud Gateway, "Единая точка входа, перенаправляет запросы в сервисы")
+
+System_Boundary(SmartHomeSystem, Система "Теплый Дом") {
+    Container(deviceManagementService, "Device Management Service", MAIN_TECH, "Управление устройствами")
+    Container(userManagementService, "User Management Service", MAIN_TECH,"Управляет информацией о пользователях и аутентификацией")
+    Container(telemetryService, "Telemetry Service", MAIN_TECH, "Информация с устройств")
+    Container(userSupportService, "User Support Service", MAIN_TECH, "Тех. поддержка пользователей")
+    ContainerQueue(kafka, "Шина данных", "Apache Kafka", "Брокер сообщений для асинхронного взаимодействия")
+
+    ContainerDb(deviceDb, "Device DB", "RDB_TECH", "Хранит информацию об устройствах")
+    ContainerDb(userDb, "User DB", "RDB_TECH", "Хранит информацию о пользователе")
+    ContainerDb(monitoringDb, "Telemetry", TELEMETRY_TECH, "Информация с устройств")
+    ContainerDb(userSupportDb, "User Support DB", "RDB_TECH", "Хранит данные об обращениях пользователей")
+
+}
+
+
+
+Rel(user, mobileApp, "Использует приложение", "Руки и Голова:)")
+Rel(mobileApp, apiGateway, "Отравляет запросы", "HTTP_PROTOCOL")
+Rel(apiGateway, deviceManagementService, SEND_REQUEST_TO_SERVICE, HTTP_PROTOCOL)
+Rel(apiGateway, userManagementService, SEND_REQUEST_TO_SERVICE, "HTTP_PROTOCOL")
+Rel(apiGateway, telemetryService, SEND_REQUEST_TO_SERVICE, "HTTP_PROTOCOL")
+Rel(apiGateway, userSupportService, SEND_REQUEST_TO_SERVICE, "HTTP_PROTOCOL")
+
+Rel(deviceManagementService, deviceDb, "Читает и записывает", DB_PROTOCOL)
+Rel(userManagementService, userDb, "Читает и записывает", DB_PROTOCOL)
+Rel(telemetryService, monitoringDb, "Читает и записывает", DB_PROTOCOL)
+Rel(userSupportService, userSupportDb, "Читает и записывает", DB_PROTOCOL)
+
+Rel(deviceManagementService, kafka, "Отправляет команды", "Топик Kafka")
+Rel(kafka, telemetryService, "Телеметрия", "KAFKA/HTTP")
+
+Container_Ext(sensor, "Sensor", "Датчики", "Отправляет данные в систему")
+Rel(sensor, kafka, "Отправляет данные датчиков в kafka асинхронно", HTTP)
+Rel(kafka, sensor, "Отправляет команды", HTTP)
+
+@enduml

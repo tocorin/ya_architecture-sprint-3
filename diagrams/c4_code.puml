@@ -1,0 +1,30 @@
+@startuml
+
+package "Telemetry Service" {
+    class RestController {
+        + getTelemetryData(): String
+        + getDeviceStatus(): String
+    }
+
+    class TelemetryServiceLayer {
+        saveTelemetryForDevice(data: JsonNode): void
+        getTelemetryForDevice(deviceId: String, queryParam:JsonNode): JsonNode
+    }
+
+    class TelemetryRepository {
+        + fetchData(query: String): List
+        + saveData(data: String): void
+    }
+
+    class KafkaConsumer {
+        + startListening(): void
+        + processMessage(message: String): void
+        + getLatestData(): String
+    }
+
+    RestController --> TelemetryServiceLayer : использует
+    TelemetryServiceLayer --> TelemetryRepository : доступ к слою бд
+    KafkaConsumer --> TelemetryServiceLayer: использует
+}
+
+@enduml
