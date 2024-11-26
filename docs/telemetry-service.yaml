@@ -1,0 +1,191 @@
+openapi: 3.0.3
+info:
+  title: Сервис телеметрии
+  description: API для сервиса телеметрии (telemetry api).
+  version: 1.0.0
+servers:
+  - url: 'https://prod.wh.com/telemetry'
+    description: Production server
+  - url: 'https://dev.wh.com/telemetry'
+    description: Developer server
+components:
+  schemas:
+    telemetry-request:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          additionalProperties: true
+      required:
+        - deviceId
+        - timestamp
+        - data
+    telemetry-response:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    JSessionIdAuth:
+      type: apiKey
+      in: header
+      name: JSESSIONID
+security:
+  - JSessionIdAuth: [ ]
+paths:
+  /:
+    get:
+      summary: Получить данные телеметрии
+      security:
+        - JSessionIdAuth: [ ]
+      parameters:
+        - name: byDate
+          description: фильтр по дате
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: deviceId
+          description: фильтр по устройству
+          in: query
+          schema:
+            type: integer
+          required: false
+      responses:
+        '200':
+          description: Успешное получение данных телеметрии
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/telemetry-response'
+        '401':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Не авторизован
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Нет данных
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Ошибка сервера
+
+    post:
+      summary: Добавить данные телеметрии
+      security:
+        - JSessionIdAuth: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/telemetry-request'
+      responses:
+        '201':
+          description: Данные телеметрии успешно добавлены
+        '400':
+          description: Ошибка в данных.
+        '500':
+          description: Ошибка сервера
+
+  /{deviceId}:
+    summary: Получить последние данные телеметрии для устройства
+    get:
+      parameters:
+        - name: byDate
+          description: фильтр по дате
+          in: query
+          schema:
+            type: string
+          required: false
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '200':
+          description: Данные телеметрии успешно добавлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/telemetry-response'
+        '400':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Ошибка в данных.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Ошибка сервера.
+
+
+  /{deviceId}/latest:
+    get:
+      summary: Получить последние данные телеметрии для устройства
+      parameters:
+        - name: byIndicator
+          description: фильтр по показателю
+          in: query
+          schema:
+            type: string
+          required: false
+        - name: limit
+          description: ограничение на ответ по кол-ву строк
+          in: query
+          schema:
+            minimum: 10
+            type: integer
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/telemetry-response'
+          description: Успешное получение последних данных телеметрии.
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Устройство не найдено.
+        '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Ошибка сервера.

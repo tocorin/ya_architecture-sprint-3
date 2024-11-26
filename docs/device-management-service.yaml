@@ -1,0 +1,271 @@
+openapi: 3.0.3
+info:
+  title: Сервис управления устройствами
+  description: API для сервиса управления устройствами (device management api).
+  version: 1.0.0
+servers:
+  - url: 'https://prod.wh.com/device-management'
+    description: Production server
+  - url: 'https://dev.wh.com/device-management'
+    description: Developer server
+
+paths:
+  /houses:
+    get:
+      summary: Получить список домов
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение списка домов
+    post:
+      summary: Создать новый дом
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Дом успешно создан
+
+  /houses/{houseId}:
+    get:
+      summary: Получить дом по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение дома
+        '404':
+          description: Дом не найден
+    put:
+      summary: Обновить дом по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Дом успешно обновлён
+        '404':
+          description: Дом не найден
+    delete:
+      summary: Удалить дом по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Дом успешно удалён
+        '404':
+          description: Дом не найден
+
+  /modules:
+    get:
+      summary: Получить список модулей
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение списка модулей
+    post:
+      summary: Создать новый модуль
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Модуль успешно создан
+
+  /modules/{moduleId}:
+    get:
+      summary: Получить модуль по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение модуля
+        '404':
+          description: Модуль не найден
+    put:
+      summary: Обновить модуль по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Модуль успешно обновлён
+        '404':
+          description: Модуль не найден
+    delete:
+      summary: Удалить модуль по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Модуль успешно удалён
+        '404':
+          description: Модуль не найден
+
+  /devices:
+    get:
+      summary: Получить список устройств
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение списка устройств
+    post:
+      summary: Создать новое устройство
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Устройство успешно создано
+
+  /devices/{deviceId}:
+    get:
+      summary: Получить устройство по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение устройства
+        '404':
+          description: Устройство не найдено
+    put:
+      summary: Обновить устройство по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Устройство успешно обновлено
+        '404':
+          description: Устройство не найдено
+    delete:
+      summary: Удалить устройство по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Устройство успешно удалено
+        '404':
+          description: Устройство не найдено
+
+  /device-types:
+    get:
+      summary: Получить список типов устройств
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение списка типов устройств
+    post:
+      summary: Создать новый тип устройства
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Тип устройства успешно создан
+
+  /device-types/{deviceTypeId}:
+    get:
+      summary: Получить тип устройства по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение типа устройства
+        '404':
+          description: Тип устройства не найден
+    put:
+      summary: Обновить тип устройства по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Тип устройства успешно обновлен
+        '404':
+          description: Тип устройства не найден
+    delete:
+      summary: Удалить тип устройства по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Тип устройства успешно удален
+        '404':
+          description: Тип устройства не найден

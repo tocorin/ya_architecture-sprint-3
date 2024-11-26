@@ -1,0 +1,177 @@
+openapi: 3.0.3
+info:
+  title: Сервис техподдержки
+  description: API для сервиса техподдержки (user support api).
+  version: 1.0.0
+servers:
+  - url: 'https://prod.wh.com/support'
+    description: Production server
+  - url: 'https://dev.wh.com/support'
+    description: Developer server
+components:
+  schemas:
+    ticket-request:
+      type: object
+      properties:
+        userId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        message:
+          type: string
+        status:
+          type: string
+          enum:
+            - high
+            - mid
+            - low
+      additionalProperties: true
+      required:
+        - deviceId
+        - timestamp
+        - data
+    ticket-response:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    JSessionIdAuth:
+      type: apiKey
+      in: header
+      name: JSESSIONID
+security:
+  - JSessionIdAuth: [ ]
+paths:
+  /support/tickets:
+    get:
+      summary: Получить список заявок в техподдержку
+      parameters:
+        - name: byUserId
+          in: query
+          schema:
+            type: string
+          required: false
+          description: фильтр по пользователю
+        - name: byDate
+          in: query
+          schema:
+            type: string
+            format: date-time
+          required: false
+          description: фильтр по дате
+        - name: limit
+          in: query
+          schema:
+            type: integer
+          required: false
+          description: ограничение по кол-ву записей, что возвращает запрос
+      responses:
+        '200':
+          description: Успешное получение списка заявок
+        '404':
+          description: Заявка не найдена
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Создать новую заявку в техподдержку
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ticket-request'
+      responses:
+        '201':
+          description: Заявка успешно создана
+        '400':
+          description: Не удалось создать заявку. Проверьте данные
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /support/tickets/{ticketId}:
+    get:
+      summary: Получить заявку по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ticket-response'
+          description: Успешное получение заявки
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Заявка не найдена
+    put:
+      summary: Обновить заявку по ID
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ticket-request'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ticket-response'
+          description: Успешное получение заявки
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Заявка не найдена
+
+    delete:
+      summary: Закрыть заявку по ID
+      responses:
+        '204':
+          description: Заявка успешно закрыта
+        '404':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Заявка не найдена
+

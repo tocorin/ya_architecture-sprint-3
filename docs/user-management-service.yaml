@@ -1,0 +1,124 @@
+openapi: 3.0.3
+info:
+  title: Сервис управления пользователями
+  description: API для сервиса управления пользователями (user management api).
+  version: 1.0.0
+servers:
+  - url: 'https://prod.wh.com/telemetry'
+    description: Production server
+  - url: 'https://dev.wh.com/telemetry'
+    description: Developer server
+components:
+  schemas:
+    telemetry-request:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: object
+          additionalProperties: true
+      required:
+        - deviceId
+        - timestamp
+        - data
+    telemetry-response:
+      type: object
+      properties:
+        deviceId:
+          type: integer
+        timestamp:
+          type: string
+          format: date-time
+        data:
+          type: array
+          items:
+            type: object
+            additionalProperties: true
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    JSessionIdAuth:
+      type: apiKey
+      in: header
+      name: JSESSIONID
+security:
+  - JSessionIdAuth: [ ]
+paths:
+  /users:
+    get:
+      summary: Получить список пользователей
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение списка пользователей
+    post:
+      summary: Создать нового пользователя
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '201':
+          description: Пользователь успешно создан
+
+  /users/{userId}:
+    get:
+      summary: Получить пользователя по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Успешное получение пользователя
+        '404':
+          description: Пользователь не найден
+    put:
+      summary: Обновить пользователя по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Пользователь успешно обновлён
+        '404':
+          description: Пользователь не найден
+    delete:
+      summary: Удалить пользователя по ID
+      parameters:
+        - name: JSESSIONID
+          in: header
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Пользователь успешно удалён
+        '404':
+          description: Пользователь не найден
