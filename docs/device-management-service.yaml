@@ -1,0 +1,617 @@
+openapi: 3.0.3
+info:
+  title: Сервис управления устройствами
+  description: API для сервиса управления устройствами (device management api).
+  version: 1.0.0
+servers:
+  - url: 'https://prod.wh.com/device-management'
+    description: Production server
+  - url: 'https://dev.wh.com/device-management'
+    description: Developer server
+components:
+  parameters:
+    house_id:
+      name: houseId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор дома
+    module_id:
+      name: moduleId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор модуля
+    device_id:
+      name: deviceId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор устройства
+    device_type_id:
+      name: deviceTypeId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор типа утройства
+  schemas:
+    home:
+      type: object
+      properties:
+        id:
+          type: integer
+        userId:
+          type: integer
+        address:
+          type: string
+    home_colleciton:
+      type: array
+      items:
+        $ref: '#/components/schemas/home'
+    module:
+      type: object
+      properties:
+        id:
+          type: integer
+        house_id:
+          type: integer
+        device_type_id:
+          type: integer
+        title:
+          type: string
+    module_collection:
+      type: array
+      items:
+        $ref: '#/components/schemas/module'
+    device:
+      type: object
+      properties:
+        id:
+          type: integer
+        module_id:
+          type: integer
+        serial_number:
+          type: string
+        status:
+          type: string
+    device_collection:
+      type: array
+      items:
+        $ref: '#/components/schemas/device'
+    device-type:
+      type: object
+      properties:
+        id:
+          type: integer
+        code:
+          type: string
+        description:
+          type: string
+    device-type_collection:
+      type: array
+      items:
+        $ref: '#/components/schemas/device-type'
+
+    error:
+      type: object
+      properties:
+        code:
+          type: string
+        message:
+          type: string
+        stacktrace:
+          type: string
+      required:
+        - code
+        - message
+  securitySchemes:
+    JSessionIdAuth:
+      type: apiKey
+      in: header
+      name: JSESSIONID
+security:
+  - JSessionIdAuth: [ ]
+paths:
+  /houses:
+    get:
+      summary: Получить список домов
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '200':
+          description: Успешное получение списка домов
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/home_colleciton'
+        '404':
+          description: Дома не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    post:
+      summary: Создать новый дом
+      security:
+        - JSessionIdAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/home'
+      responses:
+        '201':
+          description: Дом успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/home'
+        '400':
+            description: Ошибка в запросе
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /houses/{houseId}:
+    get:
+      summary: Получить дом по ID
+      parameters:
+        - $ref: '#/components/parameters/house_id'
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '200':
+          description: Дом успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/home'
+        '404':
+            description: Дом не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    put:
+      summary: Обновить дом по ID
+      parameters:
+        - $ref: '#/components/parameters/house_id'
+      security:
+        - JSessionIdAuth: [ ]
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/home'
+      responses:
+        '200':
+          description: Дом успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/home'
+        '404':
+          description: Дом не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    delete:
+      summary: Удалить дом по ID
+      parameters:
+        - $ref: '#/components/parameters/house_id'
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '204':
+          description: Дом успешно удалён
+        '404':
+          description: Дом не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
+  /modules:
+    get:
+      summary: Получить список модулей
+      security:
+        - JSessionIdAuth: [ ]
+      responses:
+        '200':
+          description: Успешное получение списка модулей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/module_collection'
+        '404':
+            description: Не найдено
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+      
+    post:
+      summary: Создать новый модуль
+      security:
+        - JSessionIdAuth: [ ]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/module'
+      responses:
+        '201':
+          description: Модуль успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/module'
+        '400':
+            description: Ошибка в запросе
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /modules/{moduleId}:
+    get:
+      summary: Получить модуль по ID
+      parameters:
+        - $ref: '#/components/parameters/module_id'
+      responses:
+        '200':
+          description: Успешное получение модуля
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/module'
+        '404':
+          description: Модуль не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    put:
+      summary: Обновить модуль по ID
+      parameters:
+        - $ref: '#/components/parameters/module_id'
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/module'
+      responses:
+        '200':
+          description: Модуль успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/module'
+        '404':
+          description: Модуль не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    delete:
+      summary: Удалить модуль по ID
+      parameters:
+        - $ref: '#/components/parameters/module_id'
+      responses:
+        '204':
+          description: Модуль успешно удалён
+        '404':
+          description: Модуль не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /devices:
+    get:
+      summary: Получить список устройств
+      security:
+        - JSessionIdAuth: []
+      responses:
+        '200':
+          description: Успешное получение списка устройств
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device_collection'
+        '404':
+          description: Устройва не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    post:
+      summary: Создать новое устройство
+      security:
+        - JSessionIdAuth: []
+      requestBody:
+        content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device'
+      responses:
+        '201':
+          description: Устройство успешно создано
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device'
+        '404':
+          description: Устройва не найдены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /devices/{deviceId}:
+    get:
+      summary: Получить устройство по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_id'
+      responses:
+        '200':
+          description: Успешное получение устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device'
+        '404':
+          description: Устройство не найдено
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    put:
+      summary: Обновить устройство по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_id'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/device'
+      responses:
+        '200':
+          description: Устройство успешно обновлено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device'
+        '404':
+          description: Устройство не найдено
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    delete:
+      summary: Удалить устройство по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_id'
+      responses:
+        '204':
+            description: Устройство успешно удалено
+        '404':
+            description: Устройство не найдено
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /device-types:
+    get:
+      summary: Получить список типов устройств
+      security:
+        - JSessionIdAuth: []
+      responses:
+        '200':
+          description: Успешное получение списка типов устройств
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device-type_collection'
+        '404':
+            description: Тип устройсва не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    post:
+      summary: Создать новый тип устройства
+      security:
+        - JSessionIdAuth: []
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device-type'
+      responses:
+        '201':
+          description: Тип устройства успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device-type'
+        '404':
+            description: Тип устройсва не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+
+  /device-types/{deviceTypeId}:
+    get:
+      summary: Получить тип устройства по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_type_id'
+      responses:
+        '200':
+          description: Успешное получение типа устройства
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device-type'
+        '404':
+            description: Тип устройсва не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    put:
+      summary: Обновить тип устройства по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_type_id'
+      responses:
+        '200':
+          description: Тип устройства успешно обновлен
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/device-type'
+        '404':
+            description: Тип устройсва не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+    delete:
+      summary: Удалить тип устройства по ID
+      security:
+        - JSessionIdAuth: []
+      parameters:
+        - $ref: '#/components/parameters/device_type_id'
+      responses:
+        '204':
+          description: Тип устройства успешно удален
+        '404':
+            description: Тип устройсва не найден
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
+        '500':
+            description: Ошибка сервера
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/error'
