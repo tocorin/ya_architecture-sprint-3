@@ -9,10 +9,20 @@ servers:
   - url: 'https://dev.wh.com/support'
     description: Developer server
 components:
+  parameters:
+    ticket_id:
+      name: ticketId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор заявки
   schemas:
-    ticket-request:
+    ticket:
       type: object
       properties:
+        id:
+          type: integer
         userId:
           type: integer
         timestamp:
@@ -31,6 +41,11 @@ components:
         - deviceId
         - timestamp
         - data
+
+    ticket_collection:
+      type: array
+      items: 
+        $ref: '#/components/schemas/ticket'
     ticket-response:
       type: object
       properties:
@@ -67,6 +82,8 @@ paths:
   /support/tickets:
     get:
       summary: Получить список заявок в техподдержку
+      security:
+        - JSessionIdAuth: [ ]
       parameters:
         - name: byUserId
           in: query
@@ -90,23 +107,39 @@ paths:
       responses:
         '200':
           description: Успешное получение списка заявок
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ticket_collection'
         '404':
           description: Заявка не найдена
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     post:
       summary: Создать новую заявку в техподдержку
+      security:
+        - JSessionIdAuth: [ ]
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ticket-request'
+              $ref: '#/components/schemas/ticket'
       responses:
         '201':
           description: Заявка успешно создана
+          content:
+            application/json:
+              schema:
+               $ref: '#/components/schemas/ticket'
         '400':
           description: Не удалось создать заявку. Проверьте данные
           content:
@@ -119,15 +152,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+
   /support/tickets/{ticketId}:
     get:
       summary: Получить заявку по ID
+      security:
+        - JSessionIdAuth: [ ]
       parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/ticket_id'
       responses:
         '200':
           content:
@@ -141,20 +173,30 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
           description: Заявка не найдена
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     put:
       summary: Обновить заявку по ID
+      security:
+        - JSessionIdAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/ticket_id'
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/ticket-request'
+              $ref: '#/components/schemas/ticket'
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ticket-response'
+                $ref: '#/components/schemas/ticket'
           description: Успешное получение заявки
         '404':
           content:
@@ -162,9 +204,18 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
           description: Заявка не найдена
-
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     delete:
       summary: Закрыть заявку по ID
+      security:
+        - JSessionIdAuth: [ ]
+      parameters:
+        - $ref: '#/components/parameters/ticket_id'
       responses:
         '204':
           description: Заявка успешно закрыта
@@ -174,4 +225,10 @@ paths:
               schema:
                 $ref: '#/components/schemas/error'
           description: Заявка не найдена
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 

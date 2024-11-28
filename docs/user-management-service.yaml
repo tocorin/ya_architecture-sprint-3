@@ -9,35 +9,32 @@ servers:
   - url: 'https://dev.wh.com/telemetry'
     description: Developer server
 components:
+  parameters:
+    user_id:
+      name: userId
+      required: true
+      in: path
+      schema:
+        type: string
+      description: идентификатор пользователя
   schemas:
-    telemetry-request:
+    user:
       type: object
       properties:
-        deviceId:
+        id:
           type: integer
-        timestamp:
+        name:
           type: string
-          format: date-time
-        data:
-          type: object
-          additionalProperties: true
-      required:
-        - deviceId
-        - timestamp
-        - data
-    telemetry-response:
-      type: object
-      properties:
-        deviceId:
-          type: integer
-        timestamp:
+        email:
           type: string
-          format: date-time
-        data:
-          type: array
-          items:
-            type: object
-            additionalProperties: true
+        username:
+          type: string
+        password:
+          type: string
+    user_collection:
+      type: array
+      items:
+        $ref: '#/components/schemas/user'
     error:
       type: object
       properties:
@@ -61,64 +58,125 @@ paths:
   /users:
     get:
       summary: Получить список пользователей
-      parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+      security:
+        - JSessionIdAuth: [ ]
       responses:
         '200':
           description: Успешное получение списка пользователей
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user_collection'
+        '404':
+          description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     post:
       summary: Создать нового пользователя
-      parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+      security:
+        - JSessionIdAuth: [ ]
+      requestBody:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
       responses:
         '201':
           description: Пользователь успешно создан
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
+        '400':
+          description: Неправильный запрос
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
   /users/{userId}:
     get:
       summary: Получить пользователя по ID
       parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/user_id'
+      security:
+        - JSessionIdAuth: [ ]
       responses:
         '200':
           description: Успешное получение пользователя
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
         '404':
           description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     put:
       summary: Обновить пользователя по ID
       parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/user_id'
+      security:
+        - JSessionIdAuth: [ ]
       responses:
         '200':
           description: Пользователь успешно обновлён
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/user'
         '404':
           description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
     delete:
       summary: Удалить пользователя по ID
       parameters:
-        - name: JSESSIONID
-          in: header
-          required: true
-          schema:
-            type: string
+        - $ref: '#/components/parameters/user_id'
+      security:
+        - JSessionIdAuth: [ ]
       responses:
         '204':
           description: Пользователь успешно удалён
         '404':
           description: Пользователь не найден
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+        '500':
+          description: Ошибка сервера
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'

@@ -114,9 +114,21 @@ paths:
       responses:
         '201':
           description: Данные телеметрии успешно добавлены
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/telemetry-request'
         '400':
-          description: Ошибка в данных.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+          description: Ошибка в запросе
         '500':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
           description: Ошибка сервера
 
   /{deviceId}:
